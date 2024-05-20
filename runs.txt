@@ -1,0 +1,22 @@
+version 26 model.alpha=0.5 model.gamma=1.0 dataset.batch_size=16 model.lr=1e-04 dataset.threshold=0.05
+version 25 model.alpha=0.5 model.gamma=1.0 dataset.batch_size=16 model.lr=1e-04 dataset.threshold=0.03
+version 24 model.alpha=0.5 model.gamma=1.0 dataset.batch_size=16 model.lr=1e-04 dataset.threshold=0.02
+version 23 model.alpha=0.5 model.gamma=1.0 dataset.batch_size=16 model.lr=1e-04 dataset.threshold=0.008
+version 22 model.alpha=0.5 model.gamma=1.0 dataset.batch_size=16 model.lr=1e-04 dataset.threshold=0.005
+
+version 27 model.lr=1e-05
+version 28 model.lr=2e-05
+version 29 model.lr=5e-05
+version 30 model.lr=1e-04
+version 31 model.lr=2e-04
+version 32 model.lr=5e-04
+
+version 33 model=resnet34 model.lr=0.0005
+version 34 model=resnet34 model.lr=0.0008
+version 35 model=resnet34 model.lr=0.001
+version 36 model=resnet34 model.lr=0.005
+
+version 37 model=convnext_atto
+version 38 model=convnext_femto
+version 39 model=convnext_pico
+version 40 model=convnext_nano

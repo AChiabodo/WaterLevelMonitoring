@@ -1,0 +1,9 @@
+task : "regression"
+model_name : "resnet34"
+pretrained : False
+num_classes : 3
+in_chans : 4
+lr : 0.005
+weight_decay : 0.01
+alpha : 0.5
+gamma : 1.0

@@ -1,0 +1,9 @@
+task : "classification"
+model_name : "mobilenetv3_small_050"
+pretrained : False
+num_classes : 3
+in_chans : 4
+lr : 0.0001
+weight_decay : 0.01
+alpha : 0.5
+gamma : 1.0

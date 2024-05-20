@@ -1,0 +1,7 @@
+batch_size : 16
+num_workers : 1
+data_dir : "data\\NDWITemporal"
+task : "regression"
+steps : 4
+threshold : 0.0001
+manual_split : True
