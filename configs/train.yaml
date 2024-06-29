@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - model: resnet34
+  - model: resnet18
   - dataset: NDWI
   - trainer: default
 
