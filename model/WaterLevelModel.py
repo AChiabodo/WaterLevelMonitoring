@@ -48,14 +48,14 @@ class WaterLevelModel(LightningModule):
         out = self.model(x)
         if self.hparams["task"] == "classification":
             self.val_acc(out.argmax(1), y)
-            self.log("valid_acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+            self.log("valid_acc", self.val_acc, on_step=False, on_epoch=True)
             self.f1(out.argmax(1), y)
-            self.log("valid_f1", self.f1, on_step=False, on_epoch=True)
+            self.log("valid_f1", self.f1, on_step=False, on_epoch=True, prog_bar=True)
         if self.hparams["task"] == "regression":
             self.val_acc(out.float().squeeze(1), y.float())
-            self.log("valid_err", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+            self.log("valid_err", self.val_acc, on_step=False, on_epoch=True)
             self.r2(out.float().squeeze(1), y.float())
-            self.log("train_r2", self.r2, on_step=False, on_epoch=True)
+            self.log("train_r2", self.r2, on_step=False, on_epoch=True, prog_bar=True)
         lr = self.trainer.lr_scheduler_configs[0].scheduler.get_last_lr()[0]
         self.log("lr", lr, on_step=False, on_epoch=True)
         
