@@ -9,7 +9,7 @@ def main(args: DictConfig):
     L.seed_everything(args.seed)
     model = WaterLevelModel(**args.model)
     dm = WaterLevelDataModule(**args.dataset)
-    trainer = L.Trainer(**args.trainer)
+    trainer = L.Trainer(enable_checkpointing=False,**args.trainer)
     trainer.fit(model, datamodule=dm)
     
 if __name__ == "__main__":

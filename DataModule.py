@@ -95,12 +95,12 @@ class WaterLevelDataset(Dataset):
     
     def __getitem__(self, idx):
         tile = xr.open_dataarray(self.tiles[idx],decode_coords="all").squeeze()
-        if (tile.shape[-2:] != (512, 512)):
+        if (tile.shape[-2:] != (256, 256)):
             raise ValueError(f"File {tile} has shape {tile.shape}")
-        tile = tile.to_numpy()[self.start:self.end].reshape(-1,512,512)
+        tile = tile.to_numpy()[self.start:self.end].reshape(-1,256,256) #TODO: Check if this is correct
         label = self.targets[idx]
         return tile, np.array(label)
     
 if __name__ == "__main__":
-    DataModule=WaterLevelDataModule(data_dir="data\\NDWITemporal",batch_size=1,num_workers=2,manual_split=True,task="regression",steps=4,threshold=0.0001)
+    DataModule=WaterLevelDataModule(data_dir="data\\NDWITemporal_256",batch_size=1,num_workers=2,manual_split=False,task="regression",steps=4,threshold=0.0001)
     DataModule.setup()
