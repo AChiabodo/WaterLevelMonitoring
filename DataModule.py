@@ -9,10 +9,10 @@ import xarray as xr
 from scipy.stats import kstest
 
 class WaterLevelDataModule(LightningDataModule):
-    def __init__(self, **hparams : DictConfig):
+    def __init__(self,task="classification", **hparams : DictConfig):
         super().__init__()
         self.save_hyperparameters()
-        
+        self.hparams["task"] = task
         self.batch_size = self.hparams["batch_size"]
         self.num_workers = self.hparams["num_workers"]
         self.data_dir = self.hparams["data_dir"]
@@ -29,7 +29,7 @@ class WaterLevelDataModule(LightningDataModule):
             print("Zero samples in Eval: ", len([x for x in [x[1] for x in self.val_dataset] if x == 0]))
             print("Positive samples in Eval: ", len([x for x in [x[1] for x in self.val_dataset] if x == 1]))
             print("Negative samples in Eval: ", len([x for x in [x[1] for x in self.val_dataset] if x == 2]))
-        else:
+        elif self.hparams["task"] == "regression":
             print("Mean of Train: ", np.mean([x[1] for x in self.train_dataset]))
             print("Mean of Eval: ", np.mean([x[1] for x in self.val_dataset]))
             print("Std of Train: ", np.std([x[1] for x in self.train_dataset]))
@@ -89,6 +89,9 @@ class WaterLevelDataset(Dataset):
                             self.targets.append(0)
                     case "regression":
                         self.targets.append(change) if abs(change) > threshold else self.targets.append(0.0)
+                    case "segmentation":
+                        mask = os.path.join(folder, "tiles", subdir, "mask.nc")
+                        self.targets.append(mask)
 
     def __len__(self):
         return len(self.tiles)
@@ -98,9 +101,15 @@ class WaterLevelDataset(Dataset):
         if (tile.shape[-2:] != (256, 256)):
             raise ValueError(f"File {tile} has shape {tile.shape}")
         tile = tile.to_numpy()[self.start:self.end].reshape(-1,256,256) #TODO: Check if this is correct
-        label = self.targets[idx]
-        return tile, np.array(label)
+        if self.task == "segmentation":
+            label = xr.open_dataset(self.targets[idx],decode_coords="all")["water_change"].squeeze().to_numpy() + 1 #shifts from -1,0,1 to 0,1,2
+        else:
+            label = np.array(self.targets[idx])
+        return tile, label
     
 if __name__ == "__main__":
-    DataModule=WaterLevelDataModule(data_dir="data\\NDWITemporal_256",batch_size=1,num_workers=2,manual_split=False,task="regression",steps=4,threshold=0.0001)
+    DataModule=WaterLevelDataModule(data_dir="data\\NDWI256",batch_size=1,num_workers=0,manual_split=False,task="segmentation",steps=4,threshold=0.0001)
     DataModule.setup()
+    train_loader = DataModule.train_dataloader()
+    train_loader = iter(train_loader)
+    print(next(train_loader))
