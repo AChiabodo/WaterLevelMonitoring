@@ -1,4 +1,3 @@
-task : "classification"
 model_name : "resnet50"
 pretrained : True
 num_classes : 3

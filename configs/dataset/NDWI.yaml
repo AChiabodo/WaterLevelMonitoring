@@ -1,7 +1,6 @@
 batch_size : 16
 num_workers : 1
 data_dir : "data\\NDWI256"
-task : "classification"
 steps : 4
 threshold : 0.015
 manual_split : True

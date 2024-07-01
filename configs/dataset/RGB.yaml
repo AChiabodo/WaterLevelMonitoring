@@ -1,6 +1,5 @@
 batch_size : 8
 num_workers : 1
 data_dir : "data\\RGBTemporal"
-task : "classification"
 steps : 4
 threshold : 0.02
