@@ -43,6 +43,10 @@ class WaterLevelDataModule(LightningDataModule):
         return DataLoader(self.val_dataset,batch_size=2,num_workers=self.num_workers,shuffle=False,persistent_workers=True,drop_last=True)
         
 class WaterLevelDataset(Dataset):
+    
+    classColors = [(255, 0, 0), (255, 255, 255), (0, 0, 255)]
+    classColors = np.array(classColors)
+    
     def __init__(self, root : str,split : str, task : str,threshold : float = 0.02,steps: int = 4):
         self.root = root
         self.tiles = []
@@ -107,9 +111,28 @@ class WaterLevelDataset(Dataset):
             label = np.array(self.targets[idx])
         return tile, label
     
+    @classmethod
+    def colorizePrediction(cls, prediction):
+        return cls.classColors[np.argmax(prediction[0].detach().cpu().numpy(),axis=0).astype("uint8")].astype("uint8")
+    #Image.fromarray(colors[].astype("uint8")).show()
+
+    @classmethod
+    def colorizeTarget(cls, target):
+        return cls.classColors[target[0].detach().cpu().numpy().astype("uint8")].astype("uint8")
+    
 if __name__ == "__main__":
     DataModule=WaterLevelDataModule(data_dir="data\\NDWI256",batch_size=1,num_workers=0,manual_split=False,task="segmentation",steps=4,threshold=0.0001)
     DataModule.setup()
     train_loader = DataModule.train_dataloader()
     train_loader = iter(train_loader)
     print(next(train_loader))
+    
+    
+#from PIL import Image
+#import numpy as np
+#classColors = [(255, 0, 0), (255, 255, 255), (0, 0, 255)]
+#classColors = np.array(classColors)
+#predictions = Image.fromarray(classColors[np.argmax(out[0].detach().cpu().numpy(),axis=0).astype("uint8")].astype("uint8"))
+#labels = Image.fromarray(classColors[y[0].detach().cpu().numpy().astype("uint8")].astype("uint8"))
+#predictions.show()
+#labels.show()
