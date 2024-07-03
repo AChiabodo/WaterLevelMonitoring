@@ -6,6 +6,7 @@ from lightning import LightningModule
 from omegaconf import DictConfig
 from segmentation_models_pytorch.losses import DiceLoss, FocalLoss
 import segmentation_models_pytorch as smp
+import numpy as np
 
 SUPPORTED_TASKS = ["classification", "regression" , "segmentation"]
 
@@ -74,7 +75,7 @@ class WaterLevelModel(LightningModule):
             self.log("train_r2", self.r2, on_step=False, on_epoch=True, prog_bar=True)
         if self.hparams["task"] == "segmentation":
             self.val_acc(out.argmax(1), y)
-            self.log("valid_acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+            self.log("valid_iou", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
         lr = self.trainer.lr_scheduler_configs[0].scheduler.get_last_lr()[0]
         self.log("lr", lr, on_step=False, on_epoch=True)
         
