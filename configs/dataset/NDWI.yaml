@@ -1,6 +1,6 @@
 batch_size : 16
-num_workers : 1
+num_workers : 4
 data_dir : "data\\NDWI256"
 steps : 4
 threshold : 0.015
-manual_split : True
+manual_split : False
