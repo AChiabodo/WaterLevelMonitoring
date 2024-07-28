@@ -14,7 +14,7 @@ class WaterLevelModel(LightningModule):
     def __init__(self,task = "classification", **hparams : DictConfig):
         super().__init__()
         self.save_hyperparameters()
-        self.hparams["task"] = task
+        self.hparams["task"] = task.name
         if self.hparams["task"] not in SUPPORTED_TASKS:
             raise ValueError(f"Task {self.hparams['task']} not supported. Supported tasks are {SUPPORTED_TASKS}")
         
@@ -76,6 +76,7 @@ class WaterLevelModel(LightningModule):
         if self.hparams["task"] == "segmentation":
             self.val_acc(out.argmax(1), y)
             self.log("valid_iou", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
+            #self.log
         lr = self.trainer.lr_scheduler_configs[0].scheduler.get_last_lr()[0]
         self.log("lr", lr, on_step=False, on_epoch=True)
         

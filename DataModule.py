@@ -9,10 +9,10 @@ import xarray as xr
 from scipy.stats import kstest
 
 class WaterLevelDataModule(LightningDataModule):
-    def __init__(self,task="classification", **hparams : DictConfig):
+    def __init__(self,task : DictConfig, **hparams : DictConfig):
         super().__init__()
         self.save_hyperparameters()
-        self.hparams["task"] = task
+        self.hparams["task"] = task.name
         self.batch_size = self.hparams["batch_size"]
         self.num_workers = self.hparams["num_workers"]
         self.data_dir = self.hparams["data_dir"]
@@ -52,7 +52,7 @@ class WaterLevelDataset(Dataset):
         self.tiles = []
         self.targets = []
         self.split = split
-        self.task = task
+        self.task = task.name
         df = pd.read_csv(
             os.path.join(root,"dataset.csv"),
             header=0,
@@ -78,6 +78,9 @@ class WaterLevelDataset(Dataset):
                 ):
                     continue
                 tile = os.path.join(folder, "tiles", subdir, "features.nc")
+                if xr.open_dataarray(tile,decode_coords="all").squeeze().shape[-2:] != (256, 256):
+                    print("File " + tile+" has shape " + xr.open_dataarray(tile,decode_coords="all").squeeze().shape.__str__())
+                    continue
                 change = yaml.load(
                     open(os.path.join(folder, "tiles", subdir, "metadata.yaml"), "r"),
                     Loader=yaml.FullLoader,
