@@ -1,8 +1,7 @@
 defaults:
   - _self_
-  - model: unet
+  - model: resnet18
   - dataset: NDWI
   - trainer: default
-
+  - task: segmentation
 seed: 42
-task: "segmentation"
