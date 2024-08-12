@@ -6,3 +6,4 @@ lr : 0.0002
 weight_decay : 0.05
 alpha : 0.5
 gamma : 1.0
+is_vit : False

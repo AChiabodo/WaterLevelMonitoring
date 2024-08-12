@@ -1,8 +1,7 @@
 model_name : "resnet18"
 pretrained : False
-num_classes : 3
-in_chans : 4
 lr : 0.0005
 weight_decay : 0.01
 alpha : 0.5
 gamma : 1.0
+is_vit : False

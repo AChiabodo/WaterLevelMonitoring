@@ -1,8 +1,9 @@
-model_name : "vit_wee_patch16_reg1_gap_256.sbb_in1k"
-pretrained : False
+model_name : "timm/vit_small_patch16_224.augreg_in21k_ft_in1k"
+pretrained : True
 num_classes : 3
 in_chans : 4
 lr : 0.005
 weight_decay : 0.01
 alpha : 0.5
 gamma : 1.0
+is_vit : True

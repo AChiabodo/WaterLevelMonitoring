@@ -1,1 +1,3 @@
 name : "regression"
+num_classes : 1
+steps : [0,1,2,3]

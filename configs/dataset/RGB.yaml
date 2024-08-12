@@ -1,5 +1,7 @@
 batch_size : 8
-num_workers : 1
-data_dir : "data\\RGBTemporal"
-steps : 4
-threshold : 0.02
+num_workers : 4
+data_dir : "datasets\\base_Annual\\MSI_Annual_256" #can also work with MSI datasets? Check later
+bands : [0, 1, 2]
+threshold : 0.015
+manual_split : False
+patch_size : 256
