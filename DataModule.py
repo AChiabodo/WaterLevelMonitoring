@@ -12,24 +12,21 @@ class WaterLevelDataModule(LightningDataModule):
     def __init__(self,task : DictConfig, **hparams : DictConfig):
         super().__init__()
         self.save_hyperparameters()
-        self.hparams["task"] = task.name
-        self.batch_size = self.hparams["batch_size"]
-        self.num_workers = self.hparams["num_workers"]
-        self.data_dir = self.hparams["data_dir"]
         
     def setup(self, stage=None):
         if self.hparams["manual_split"]:
-            self.train_dataset = WaterLevelDataset(root=self.data_dir,split="train",task=self.hparams["task"],steps=self.hparams["steps"],threshold=self.hparams["threshold"])
-            self.val_dataset = WaterLevelDataset(root=self.data_dir,split="eval",task=self.hparams["task"],steps=self.hparams["steps"],threshold=self.hparams["threshold"])
+            self.train_dataset =    WaterLevelDataset(split="train", hparams=self.hparams)
+            self.val_dataset =      WaterLevelDataset(split="eval",  hparams=self.hparams)
         else:
-            dataset = WaterLevelDataset(root=self.data_dir,split="all",task=self.hparams["task"],steps=self.hparams["steps"],threshold=self.hparams["threshold"])
+            dataset =               WaterLevelDataset(split="all",   hparams=self.hparams)
             train_size = int(0.8 * len(dataset))
             self.train_dataset, self.val_dataset = random_split(dataset, [train_size, len(dataset) - train_size])
-        if self.hparams["task"] == "classification":
+        
+        if self.hparams["task"]["name"] == "classification":
             print("Zero samples in Eval: ", len([x for x in [x[1] for x in self.val_dataset] if x == 0]))
             print("Positive samples in Eval: ", len([x for x in [x[1] for x in self.val_dataset] if x == 1]))
             print("Negative samples in Eval: ", len([x for x in [x[1] for x in self.val_dataset] if x == 2]))
-        elif self.hparams["task"] == "regression":
+        elif self.hparams["task"]["name"] == "regression":
             print("Mean of Train: ", np.mean([x[1] for x in self.train_dataset]))
             print("Mean of Eval: ", np.mean([x[1] for x in self.val_dataset]))
             print("Std of Train: ", np.std([x[1] for x in self.train_dataset]))
@@ -37,37 +34,39 @@ class WaterLevelDataModule(LightningDataModule):
             print(kstest([x[1] for x in self.train_dataset], [x[1] for x in self.val_dataset]))
             
     def train_dataloader(self):
-        return DataLoader(self.train_dataset,batch_size=self.batch_size,num_workers=self.num_workers,shuffle=True,persistent_workers=True)
+        return DataLoader(self.train_dataset,batch_size=self.hparams["batch_size"],num_workers=self.hparams["num_workers"],shuffle=True,persistent_workers=True)
     
     def val_dataloader(self):
-        return DataLoader(self.val_dataset,batch_size=2,num_workers=self.num_workers,shuffle=False,persistent_workers=True,drop_last=True)
+        return DataLoader(self.val_dataset,batch_size=2,num_workers=self.hparams["num_workers"],shuffle=False,persistent_workers=True,drop_last=True)
         
 class WaterLevelDataset(Dataset):
     
     classColors = [(255, 0, 0), (255, 255, 255), (0, 0, 255)]
     classColors = np.array(classColors)
     
-    def __init__(self, root : str,split : str, task : str,threshold : float = 0.02,steps: int = 4):
-        self.root = root
+    def __init__(self, split : str, hparams : DictConfig):
+        self.root = hparams["data_dir"]
         self.tiles = []
         self.targets = []
         self.split = split
-        self.task = task.name
+        self.task = hparams["task"]["name"]
+        self.steps = hparams["task"]["steps"]
+        self.bands = hparams["bands"]
+        self.patch_size = hparams["patch_size"]
+        self.threshold = hparams["threshold"]
+        self.focus = hparams["task"]["focus"] if "focus" in hparams["task"] else None
         df = pd.read_csv(
-            os.path.join(root,"dataset.csv"),
+            os.path.join(self.root,"dataset.csv"),
             header=0,
             usecols=["name", "coordinates", "category", "downloaded", "date", "split"],
             index_col=["name"],
             sep=",",
         )
-        if steps < 5:
-            self.start = 4 - steps
-            self.end = 4
-        else:
-            raise ValueError("Steps must be at most 4")
+        
         df = df[(df["downloaded"] == 1) & (df["split"] == self.split)] if self.split != "all" else df[df["downloaded"] == 1]
+        
         for name, row in df.iterrows():
-            folder = os.path.join(root,"data", name.__str__())
+            folder = os.path.join(self.root, name.__str__())
             if not os.path.isdir(folder):
                 raise ValueError(f"Folder {folder} does not exist")
             for subdir in os.listdir(os.path.join(folder, "tiles")):
@@ -78,7 +77,7 @@ class WaterLevelDataset(Dataset):
                 ):
                     continue
                 tile = os.path.join(folder, "tiles", subdir, "features.nc")
-                if xr.open_dataarray(tile,decode_coords="all").squeeze().shape[-2:] != (256, 256):
+                if xr.open_dataarray(tile,decode_coords="all").squeeze().shape[-2:] != (self.patch_size, self.patch_size):
                     print("File " + tile+" has shape " + xr.open_dataarray(tile,decode_coords="all").squeeze().shape.__str__())
                     continue
                 change = yaml.load(
@@ -88,26 +87,30 @@ class WaterLevelDataset(Dataset):
                 self.tiles.append(tile)
                 match self.task:
                     case "classification":
-                        if change > threshold:
+                        if change > self.threshold:
                             self.targets.append(1)
-                        elif change < -threshold:
+                        elif change < -self.threshold:
                             self.targets.append(2)
                         else:
                             self.targets.append(0)
                     case "regression":
-                        self.targets.append(change) if abs(change) > threshold else self.targets.append(0.0)
+                        self.targets.append(change) if abs(change) > self.threshold else self.targets.append(0.0)
                     case "segmentation":
-                        mask = os.path.join(folder, "tiles", subdir, "mask.nc")
+                        if self.focus == "temporal":
+                            mask = os.path.join(folder, "tiles", subdir, "mask.nc")
+                        else:
+                            mask = os.path.join(folder, "tiles", subdir, "water.nc")
                         self.targets.append(mask)
 
     def __len__(self):
         return len(self.tiles)
     
     def __getitem__(self, idx):
-        tile = xr.open_dataarray(self.tiles[idx],decode_coords="all").squeeze()
-        if (tile.shape[-2:] != (256, 256)):
+        tile = xr.open_dataarray(self.tiles[idx],decode_coords="all")
+        tile = tile[self.bands][:,self.steps].squeeze() if tile.ndim == 4 else tile[self.steps].squeeze()
+        if (tile.shape[-2:] != (self.patch_size, self.patch_size)):
             raise ValueError(f"File {tile} has shape {tile.shape}")
-        tile = tile.to_numpy()[self.start:self.end].reshape(-1,256,256) #TODO: Check if this is correct
+        tile = tile.to_numpy().reshape(-1,self.patch_size,self.patch_size) #TODO: Check if this is correct
         if self.task == "segmentation":
             label = xr.open_dataset(self.targets[idx],decode_coords="all")["water_change"].squeeze().to_numpy() + 1 #shifts from -1,0,1 to 0,1,2
         else:
