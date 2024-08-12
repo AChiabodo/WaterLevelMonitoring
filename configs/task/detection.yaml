@@ -1,0 +1,4 @@
+name : "segmentation"
+focus : "water"
+steps : [0]
+num_classes : 2
