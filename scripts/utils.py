@@ -10,6 +10,9 @@ COASTAL = "B01"
 BLUE = "B02"
 GREEN = "B03"
 RED = "B04"
+RED_EDGE1 = "B05"
+RED_EDGE2 = "B06"
+RED_EDGE3 = "B07"
 NIR = "B08"
 SWIR16 = "B11"
 SWIR22 = "B12"
@@ -58,7 +61,32 @@ class BandsOptions(Enum):
     NDWI = 1, # Normalized Difference Water Index
     RGB = 2, # Only B02, B03, B04
     MSI = 3, # B02, B03, B04, B08, 
+    ALL = 4 # All bands
+    NDVI = 5 # Normalized Difference Vegetation Index
+    MNDWI = 6 # Modified Normalized Difference Water Index
 
+    def get_bands(self, expand_indexes: bool = False):
+        match self:
+            case BandsOptions.NDWI:
+                return [GREEN, NIR] if not expand_indexes else ["ndwi"]
+            case BandsOptions.NDVI:
+                return [NIR, RED] if not expand_indexes else ["ndvi"]
+            case BandsOptions.MNDWI:
+                return [GREEN, SWIR22] if not expand_indexes else ["mndwi"]
+            case BandsOptions.RGB:
+                return [BLUE, GREEN, RED]
+            case BandsOptions.MSI:
+                return [BLUE, GREEN, RED, NIR, SWIR16, SWIR22, RED_EDGE1, RED_EDGE2, RED_EDGE3]
+            case BandsOptions.ALL:
+                return [BLUE, GREEN, RED, NIR, SWIR16, SWIR22, RED_EDGE1, RED_EDGE2, RED_EDGE3, "NDWI"] # NDWI is not a band, but a derived index
+    
+    @classmethod
+    def from_str(cls, value):
+        if value in BandsOptions.__members__:
+            return BandsOptions[value]
+        else:
+            return None
+    
 def str_to_enum(value):
     if value in BandsOptions.__members__:
         return BandsOptions[value]

@@ -96,8 +96,9 @@ def download_water_mask_yearly(event_location: Point, event_year: date | int,bas
     else:
         output_file = os.path.join(base_output_path,file_name)
     
-    file = get_yearly_classification_file(event_year, event_location.y, event_location.x)
     print("Downloading water mask for year ", event_year, " location: ", event_location)
+    file = get_yearly_classification_file(event_year, event_location.y, event_location.x)
+    
     full_labels = rioxarray.open_rasterio(file).squeeze()
     spatial_extent = (event_location.x - offset, event_location.y - offset, event_location.x + offset, event_location.y + offset)
     labels = full_labels.rio.clip_box(*spatial_extent)
@@ -111,6 +112,7 @@ def download_water_mask_yearly(event_location: Point, event_year: date | int,bas
             raise Exception("Invalid water type")
     labels.rio.to_raster(output_file)
     labels.close()
+    full_labels.close()
     return output_file
 
 if __name__ == "__main__":
