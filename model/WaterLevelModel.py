@@ -7,14 +7,18 @@ from omegaconf import DictConfig
 from segmentation_models_pytorch.losses import DiceLoss, FocalLoss
 import segmentation_models_pytorch as smp
 import numpy as np
+from timm.data import resolve_data_config, create_transform
 
 SUPPORTED_TASKS = ["classification", "regression" , "segmentation"]
 
 class WaterLevelModel(LightningModule):
-    def __init__(self,task = "classification", **hparams : DictConfig):
+    def __init__(self,task : DictConfig,dataset : DictConfig, **hparams : DictConfig):
         super().__init__()
         self.save_hyperparameters()
         self.hparams["task"] = task.name
+        self.hparams["num_classes"] = task.num_classes
+        self.hparams["in_chans"] = len(dataset.bands) * len(task.steps)
+        
         if self.hparams["task"] not in SUPPORTED_TASKS:
             raise ValueError(f"Task {self.hparams['task']} not supported. Supported tasks are {SUPPORTED_TASKS}")
         
@@ -29,12 +33,23 @@ class WaterLevelModel(LightningModule):
             self.train_acc = JaccardIndex(task="multiclass",num_classes=3)
             self.val_acc = JaccardIndex(task="multiclass",num_classes=3)
         else:
-            self.model = timm.create_model(
-                    self.hparams["model_name"],
-                    pretrained=self.hparams["pretrained"],
-                    num_classes=self.hparams["num_classes"] if self.hparams["task"] == "classification" else 1,
-                    in_chans=self.hparams["in_chans"],
-            )
+            if self.hparams["is_vit"] is False:
+                self.model = timm.create_model(
+                        self.hparams["model_name"],
+                        pretrained=self.hparams["pretrained"],
+                        num_classes=self.hparams["num_classes"] if self.hparams["task"] == "classification" else 1,
+                        in_chans=self.hparams["in_chans"],
+                )
+            else:
+                self.model = timm.create_model(
+                        self.hparams["model_name"],
+                        pretrained=self.hparams["pretrained"],
+                        num_classes=self.hparams["num_classes"] if self.hparams["task"] == "classification" else 1,
+                        in_chans=self.hparams["in_chans"],
+                )
+                #self.model.eval()
+                #data_config = resolve_data_config(self.model)
+                #self.transforms = create_transform(**data_config, is_training=False)
         
             self.loss = FocalLoss(mode="multiclass", alpha=self.hparams["alpha"], gamma=self.hparams["gamma"]) if self.hparams["task"] == "classification" else nn.HuberLoss()
             self.train_acc = Accuracy(task="multiclass",num_classes=3) if self.hparams["task"] == "classification" else MeanAbsoluteError()
@@ -54,7 +69,7 @@ class WaterLevelModel(LightningModule):
             loss = self.loss(out.float().squeeze(1), y.float())
             self.log("train_err", self.train_acc, on_step=True, on_epoch=True)
         if self.hparams["task"] == "segmentation":
-            loss = self.loss(out, y)
+            loss = self.loss(out, y.to(torch.int64))
             self.train_acc(out.argmax(1), y)
             self.log("train_acc", self.train_acc, on_step=True, on_epoch=True)
         self.log("train_loss", loss, on_step=True, on_epoch=True)
