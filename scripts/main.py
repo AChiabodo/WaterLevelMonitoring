@@ -6,9 +6,9 @@ import openeo
 import pandas as pd
 import logging
 
-from utils import deg_to_dec, parse_args,BandsOptions, DRIVER_URL, PRODUCT_ID, BLUE, GREEN, RED, NIR, SWIR16, SWIR22, SCL, MAX_CLOUD_COVER, RED_EDGE1, RED_EDGE2, RED_EDGE3
+from utils import deg_to_dec, parse_args,BandsOptions, DRIVER_URL, PRODUCT_ID,  GREEN,  NIR,  SCL, MAX_CLOUD_COVER
 from labels import generate_yearly_change_labels
-from tiles import create_tiles, multi_tiles
+from tiles import multi_tiles
 # from openeo.processes import ProcessBuilder as PGNode
 from openeo.internal.graph_building import PGNode
 
@@ -115,7 +115,9 @@ def instantiate_dataset(
     time_step: int = 45,
     offset: float = 0.1,
     tile_size: int = 256,
-    step_size: int = 256
+    step_size: int = 256,
+    max_cloud_cover: int = 15,
+    full_dataset: bool = False,
 ):
     df =  pd.read_csv(base_csv,header=0,usecols=["coordinates","name","category","downloaded","date","split","region"],index_col=["name"],sep=",")
 
@@ -129,16 +131,22 @@ def instantiate_dataset(
     if not os.path.isdir(data_folder):
         os.mkdir(data_folder)
     for index, row in df[df["downloaded"] == 1].iterrows():
-        
         target_df = pd.read_csv(target_csv,header=0,usecols=["coordinates","name","category","date","downloaded","split","region"],index_col=["name"],sep=",")
         current_date = date.fromisoformat(row["date"])
         folder_path = os.path.join(Path(data_folder), index.__str__())
         path_patch = labels_path = None
         
+        # Skip if the patch is already downloaded and we're downloading the full dataset
+        if full_dataset and index in target_df.index:
+            print("Data already downloaded for ", index, " skipping")
+            continue
+        
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
         
         try:
+            
+            # Download the patch if it's not already downloaded
             if not os.path.isfile(os.path.join(folder_path, "temporal_patch.nc")) :
                 print("Downloading patch for ", index)
                 path_patch = download_temporal_patch(
@@ -155,6 +163,7 @@ def instantiate_dataset(
                 print("Patch already downloaded for ", index.__str__(), ". Generating labels ....")
                 path_patch = os.path.join(folder_path, "temporal_patch.nc")
                 
+            
             if not os.path.isfile(os.path.join(folder_path, "features.nc")):
                 labels_path, features_path = generate_yearly_change_labels(
                     Point(deg_to_dec(row["coordinates"])),
@@ -207,4 +216,4 @@ def main():
     #TODO: Add the arguments
 
 if __name__ == "__main__":
-    instantiate_dataset(base_csv="baseDataset.csv",base_output_path=os.path.join("datasets","base_Annual"),offset=0.2, clear_data=True)
+    instantiate_dataset(base_csv="baseDataset.csv",base_output_path=os.path.join("datasets","base_Annual"),offset=0.2, clear_data=True, full_dataset=True)

@@ -30,8 +30,9 @@ class WaterLevelModel(LightningModule):
                     classes=self.hparams["num_classes"],
             )    
             self.loss = DiceLoss(mode="multiclass")
-            self.train_acc = JaccardIndex(task="multiclass",num_classes=3)
-            self.val_acc = JaccardIndex(task="multiclass",num_classes=3)
+            #self.loss = FocalLoss(mode="multiclass")
+            self.train_acc = JaccardIndex(task="multiclass",num_classes=self.hparams["num_classes"])
+            self.val_acc = JaccardIndex(task="multiclass",num_classes=self.hparams["num_classes"])
         else:
             if self.hparams["is_vit"] is False:
                 self.model = timm.create_model(

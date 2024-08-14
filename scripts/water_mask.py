@@ -1,78 +1,12 @@
 from enum import Enum
 import os
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
-from typing import List
 from shapely.geometry import Point
-import openeo
 import rioxarray
 import xarray
 
 from utils import get_yearly_classification_file
-
-def download_water_mask(event_location: Point, event_date: date,base_output_path: Path, name: str = "water_mask.tif", offset : float = 0.1):
-
-    output_file = os.path.join(base_output_path,name)
-    
-    spatial_extent = {
-        "west": event_location.x - offset, 
-        "east": event_location.x + offset, 
-        "north": event_location.y + offset, 
-        "south": event_location.y - offset
-    }
-    temporal_extent = [
-        str(event_date.year),
-        str(event_date.year +1)
-    ]
-    print("Downloading water mask for ", name," location: ", event_location, " and date: ", event_date)
-    print("spatial_extent: ", spatial_extent)
-    # Connect to backend via basic authentication
-    con = openeo.connect("https://earthengine.openeo.org/v1.0")
-    con.authenticate_basic(username="group1", password="test123") # working only with testing account
-
-    datacube = con.load_collection("JRC/GSW1_4/YearlyHistory",
-                                spatial_extent=spatial_extent,
-                                temporal_extent=temporal_extent,
-                                bands=["waterClass"])
-
-    # Send Job to backend
-    job = datacube.save_result(format="GTIFF-THUMB",options={"epsgCode" : "EPSG:4326"}).create_job()
-
-    # Wait for job to finish and download
-    job.start_and_wait().get_results().download_file(output_file)
-    return output_file
-
-def download_water_mask_monthly(event_location: Point, event_date: date,base_output_path: Path, name: str = "water_mask.tif", offset : float = 0.2):
-
-    output_file = os.path.join(base_output_path,name)
-
-    spatial_extent = {
-        "west": event_location.x - offset, 
-        "east": event_location.x + offset, 
-        "north": event_location.y + offset, 
-        "south": event_location.y - offset
-    }
-    temporal_extent = [
-        str(event_date - timedelta(days=60)),
-        str(event_date + timedelta(days=30)),
-    ]
-    print("Downloading water mask for ", name," location: ", event_location, " and date: ", temporal_extent)
-    print("spatial_extent: ", spatial_extent)
-    # Connect to backend via basic authentication
-    con = openeo.connect("https://earthengine.openeo.org/v1.0")
-    con.authenticate_basic(username="group1", password="test123") # working only with testing account
-
-    datacube = con.load_collection("JRC/GSW1_4/MonthlyHistory",
-                                spatial_extent=spatial_extent,
-                                temporal_extent=temporal_extent,
-                                bands=["water"])
-    datacube = datacube.max_time()
-    # Send Job to backend
-    job = datacube.save_result(format="GTIFF",options={"epsgCode" : "EPSG:4326"}).create_job()
-
-    # Wait for job to finish and download
-    job.start_and_wait().get_results().download_file(output_file)
-    return output_file
 
 class WaterMaskType(Enum):
     SEASONAL = 1
