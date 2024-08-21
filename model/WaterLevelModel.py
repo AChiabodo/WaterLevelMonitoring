@@ -88,7 +88,7 @@ class WaterLevelModel(LightningModule):
             self.val_acc(out.float().squeeze(1), y.float())
             self.log("valid_err", self.val_acc, on_step=False, on_epoch=True)
             self.r2(out.float().squeeze(1), y.float())
-            self.log("train_r2", self.r2, on_step=False, on_epoch=True, prog_bar=True)
+            self.log("valid_r2", self.r2, on_step=False, on_epoch=True, prog_bar=True)
         if self.hparams["task"] == "segmentation":
             self.val_acc(out.argmax(1), y)
             self.log("valid_iou", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
