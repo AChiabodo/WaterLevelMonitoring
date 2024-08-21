@@ -3,7 +3,7 @@ import numpy as np
 import os
 import yaml
 from rasterio.enums import Resampling
-from utils import BandsOptions
+from utils import BandsOptions, DatasetOptions
 import pandas as pd
 from datetime import date
 
@@ -14,6 +14,7 @@ def create_tiles(
     timestamp: list | None = None,
     reshape_size: int | None = None,
     nodata_allowed: float = 0.1,
+    water_threshold: float = 0.1,
     save_change_mask: bool = False,
     save_water_mask: bool = False,
     bands: BandsOptions = BandsOptions.NDWI,
@@ -76,7 +77,7 @@ def create_tiles(
             ratio = labels_water_cut.where(labels_water_cut == 1).count().values / area
             not_nulls = cut.notnull().sum().values / depth
             step += 1
-            if ratio > 0.1 and ratio < 0.9 and not_nulls / area > nodata_allowed:
+            if ratio > water_threshold and ratio < 1-water_threshold and not_nulls / area > nodata_allowed:
                 change_value = labels_change_cut.sum().values / area
                 res.append(
                     {
@@ -122,40 +123,31 @@ def create_tiles(
 def multi_tiles(
     source_folder: str,
     row: pd.Series,
-    target_folders: list[str],
     patch_name: str,
-    target_bands: list[BandsOptions],
-    target_tile_size: list[int],
-    target_step_size: list[int],
+    target_datasets: list[DatasetOptions],
     target_timestamp: list[date],
     nodata_allowed: float = 0.1,
     save_change_mask: bool = False,
     save_water_mask: bool = False,
 ):
-    for target_folder, target_band, target_tile_size, target_step_size in zip(target_folders, target_bands, target_tile_size, target_step_size):
-        target_csv = os.path.join(target_folder,"dataset.csv")
-        if not os.path.isdir(target_folder):
+    for dataset in target_datasets:
+        target_csv = dataset.target_csv
+        target_folder = os.path.join(dataset.target_folder,patch_name)
+        if not os.path.exists(target_folder):
             os.mkdir(target_folder)
-        target_folder = os.path.join(target_folder,patch_name)
-        if not os.path.isdir(target_folder):
-            os.mkdir(target_folder)
-        if not os.path.exists(target_csv):
-            with open (target_csv, "w") as f:
-                f.write("coordinates,name,category,date,downloaded,split,region,num_patches\n")
-        else:
-            target_df = pd.read_csv(target_csv,header=0,usecols=["coordinates","name","category","date","downloaded","split","num_patches","region"],index_col=["name"],sep=",")
-            if patch_name in target_df.index:
-                continue
+        target_df = pd.read_csv(target_csv,header=0,usecols=["coordinates","name","category","date","downloaded","split","num_patches","region"],index_col=["name"],sep=",")
+        if patch_name in target_df.index:
+            continue
         tiles_number = create_tiles(
             source_folder,
-            target_tile_size,
-            target_step_size,
+            dataset.tile_size,
+            dataset.step_size,
             timestamp=[target_timestamp[0], target_timestamp[1]],
             reshape_size=None,
             nodata_allowed=nodata_allowed,
             save_change_mask=save_change_mask,
             save_water_mask=save_water_mask,
-            bands=target_band,
+            bands=dataset.bands,
             target_path=target_folder,
         )
         if tiles_number is not None and tiles_number > 0:
