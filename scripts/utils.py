@@ -3,6 +3,8 @@ import re
 import requests
 from enum import Enum
 import argparse
+import pandas as pd
+
 DRIVER_URL = "https://openeo.dataspace.copernicus.eu/openeo/1.2"
 # GEE_DRIVER_URL = "https://openeocloud.vito.be/openeo/1.0.0"
 PRODUCT_ID = "SENTINEL2_L2A"
@@ -48,6 +50,8 @@ def get_yearly_classification_file(year : int | str, latitudine : int | float, l
             return saveDir + "/" + filename
         else:
             filename = "yearlyClassification" + year + "_" + latitudine + "-" + longitudine + ".tif"
+            if os.path.exists(saveDir + "/" + filename):
+                return saveDir + "/" + filename
             link = "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GSWE/YearlyClassification/VER5-0/tiles/yearlyClassification" + year + "/" + filename
             response = requests.get(link)
             if response.status_code == 200:
@@ -78,7 +82,7 @@ class BandsOptions(Enum):
             case BandsOptions.MSI:
                 return [BLUE, GREEN, RED, NIR, SWIR16, SWIR22, RED_EDGE1, RED_EDGE2, RED_EDGE3]
             case BandsOptions.ALL:
-                return [BLUE, GREEN, RED, NIR, SWIR16, SWIR22, RED_EDGE1, RED_EDGE2, RED_EDGE3, "NDWI"] # NDWI is not a band, but a derived index
+                return [BLUE, GREEN, RED, NIR, SWIR16, SWIR22, RED_EDGE1, RED_EDGE2, RED_EDGE3, "ndwi"] # NDWI is not a band, but a derived index
     
     @classmethod
     def from_str(cls, value):
@@ -86,13 +90,33 @@ class BandsOptions(Enum):
             return BandsOptions[value]
         else:
             return None
-    
+
 def str_to_enum(value):
     if value in BandsOptions.__members__:
         return BandsOptions[value]
     else:
         return None
             
+class DatasetOptions():
+    def __init__(self, target_folder: str, bands: BandsOptions, tile_size: int, step_size: int):
+        self.target_csv = os.path.join(target_folder, "dataset.csv")
+        self.target_folder = target_folder
+        self.bands = bands
+        self.tile_size = tile_size
+        self.step_size = step_size
+        if not os.path.exists(target_folder):
+            os.makedirs(target_folder)
+        if not os.path.exists(self.target_csv):
+            with open (self.target_csv, "w") as f:
+                f.write("coordinates,name,category,date,downloaded,split,region,num_patches\n")
+    
+def check_value_in_all_csv(csv_files: list, value: str, key_column: str = "index"):
+    for csv_file in csv_files:
+        df = pd.read_csv(csv_file, index_col=key_column)
+        if value not in df.index:
+            return False
+    return True
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Download and process satellite data")
     parser.add_argument(
