@@ -169,6 +169,5 @@ multirun/
 temp.*
 .conda/
 .conda_old/
-datasets/
 yearlyClassification/
 olds.py
