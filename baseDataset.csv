@@ -3,18 +3,18 @@ coordinates,name,category,date,downloaded,split,region
 61°39'47"N 30°50'12"E,lake_ladoga_2,Lake,2017-02-01,1,eval,Europe
 61°14'25"N 30°02'30"E,lake_ladoga_3,Lake,2017-06-01,1,eval,Europe
 46°29'33"N 78°17'14"E,lake_balkhash_1,Lake,2017-04-01,1,train,Asia
-46°32'30"N 75°20'53"E,lake_balkhash_2,Lake,2017-02-01,1,train,Asia
+46°32'30"N 75°20'53"E,lake_balkhash_2,Lake,2017-03-01,0,train,Asia
 45°26'09"N 73°41'30"E,lake_balkhash_3,Lake,2017-06-01,1,train,Asia
 32°03'12"N 89°04'23"E,lake_selincuo_1,Lake,2017-02-01,1,train,Asia
 31°49'40"N 88°48'28"E,lake_selincuo_2,Lake,2017-04-01,1,train,Asia
-51°18'00"N 96°36'16"W,lake_winnipeg_1,Lake,2017-05-01,1,train,North America
+51°18'00"N 96°36'16"W,lake_winnipeg_1,Lake,2017-05-01,0,train,North America
 50°45'16"N 96°32'43"W,lake_winnipeg_2,Lake,2017-06-01,1,train,North America
 50°23'46"N 96°50'54"W,lake_winnipeg_3,Lake,2017-07-01,1,train,North America
 51°38'07"N 97°14'50"W,lake_winnipeg_4,Lake,2017-08-01,0,train,North America
 52°01'01"N 97°34'15"W,lake_winnipeg_5,Lake,2017-01-01,0,train,North America
 53°11'14"N 99°15'22"W,lake_winnipeg_6,Lake,2017-05-01,1,train,North America
 53°13'21"N 99°38'47"W,lake_winnipeg_7,Lake,2017-03-01,0,train,North America
-22°33'17"S 128°26'02"E,lake_mackay_1,Lake,2017-04-01,1,train,North America
+22°33'17"S 128°26'02"E,lake_mackay_1,Lake,2017-04-01,0,train,North America
 33°30'01"N 89°38'09"E,tibetan_lake_1,Lake,2017-06-01,1,train,Asia
 33°15'12"N 89°50'39"E,tibetan_lake_2,Lake,2017-06-01,1,train,Asia
 33°19'00"N 90°18'40"E,tibetan_lake_3,Lake,2017-08-01,1,train,Asia
