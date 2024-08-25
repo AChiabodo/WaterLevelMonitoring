@@ -14,7 +14,7 @@ def main(args: DictConfig):
     L.seed_everything(args.seed)
     model = WaterLevelModel(**args.model,task=args.task, dataset=args.dataset)
     dm = WaterLevelDataModule(**args.dataset,task=args.task)
-    logger = TensorBoardLogger("lightning_logs",name=str(args.task.name))
+    logger = TensorBoardLogger("lightning_logs",name=str(args.task.logs_dir))
     trainer = L.Trainer(enable_checkpointing=False,**args.trainer,logger=logger)
     
     trainer.fit(model, datamodule=dm)
