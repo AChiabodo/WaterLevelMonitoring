@@ -23,7 +23,8 @@ class WaterLevelModel(LightningModule):
             raise ValueError(f"Task {self.hparams['task']} not supported. Supported tasks are {SUPPORTED_TASKS}")
         
         if self.hparams["task"] == "segmentation":
-            self.model = smp.Unet(
+            self.model = smp.create_model(
+                    arch=self.hparams["model_name"],
                     encoder_name=self.hparams["encoder_name"],
                     encoder_weights="imagenet" if self.hparams["pretrained"] else None,
                     in_channels=self.hparams["in_chans"],
