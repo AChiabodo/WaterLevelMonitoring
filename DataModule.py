@@ -55,6 +55,7 @@ class WaterLevelDataset(Dataset):
         self.patch_size = hparams["patch_size"]
         self.threshold = hparams["threshold"]
         self.focus = hparams["task"]["focus"] if "focus" in hparams["task"] else None
+        self.eval_lakes = hparams["eval_lakes"] if len(hparams["eval_lakes"]) > 0 else []
         df = pd.read_csv(
             os.path.join(self.root,"dataset.csv"),
             header=0,
@@ -63,7 +64,15 @@ class WaterLevelDataset(Dataset):
             sep=",",
         )
         
-        df = df[(df["downloaded"] == 1) & (df["split"] == self.split)] if self.split != "all" else df[df["downloaded"] == 1]
+        if not self.eval_lakes:
+            df = df[(df["downloaded"] == 1) & (df["split"] == self.split)] if self.split != "all" else df[df["downloaded"] == 1]
+        else:
+            if not all([x in df.index for x in self.eval_lakes]):
+                raise ValueError(f"Eval lakes {self.eval_lakes} not in dataset")
+            elif self.split == "eval":
+                df = df[(df["downloaded"] == 1) & df.index.isin(self.eval_lakes)]
+            elif self.split == "train":
+                df = df[(df["downloaded"] == 1) & ~df.index.isin(self.eval_lakes)]
         
         for name, row in df.iterrows():
             folder = os.path.join(self.root, name.__str__())
@@ -112,7 +121,10 @@ class WaterLevelDataset(Dataset):
             raise ValueError(f"File {tile} has shape {tile.shape}")
         tile = tile.to_numpy().reshape(-1,self.patch_size,self.patch_size) #TODO: Check if this is correct
         if self.task == "segmentation":
-            label = xr.open_dataset(self.targets[idx],decode_coords="all")["water_change"].squeeze().to_numpy() + 1 #shifts from -1,0,1 to 0,1,2
+            if self.focus == "temporal":
+                label = xr.open_dataset(self.targets[idx],decode_coords="all")["water_change"].squeeze().to_numpy() + 1 #shifts from -1,0,1 to 0,1,2
+            else:
+                label = xr.open_dataset(self.targets[idx],decode_coords="all")["start"].squeeze().to_numpy()
         else:
             label = np.array(self.targets[idx])
         return tile, label
