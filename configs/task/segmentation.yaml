@@ -2,3 +2,4 @@ name : "segmentation"
 focus : "temporal"
 steps : [0,1,2,3]
 num_classes : 3
+logs_dir : "segmentation"
