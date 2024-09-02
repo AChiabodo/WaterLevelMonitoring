@@ -1,5 +1,5 @@
 encoder_name : "resnet50"
-model_name : "unet"
+model_name : "DeepLabV3"
 pretrained : True
 in_chans : 4
 num_classes : 3

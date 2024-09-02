@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: segmentation
+  - override /dataset: MSI224
+  - override /model: unet
+hydra :
+  sweeper:
+    params:
+      model.encoder_name: tu-maxvit_tiny_tf_224.in1k #,resnet18, resnet34, resnet50, vgg16
+      model.lr: 0.0001 #, 0.001
+      task.logs_dir: sweep_segmentation
+      seed : 42 #, 21, 95

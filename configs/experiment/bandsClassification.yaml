@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: classification
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: find_bands
+      model : resnet50
+      dataset : NDWI224, RGB224, 6Bands224, MSI224
+      seed : 42

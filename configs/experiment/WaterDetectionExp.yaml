@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - override /task: detection
+  - override /trainer: short
+
+hydra :
+  sweeper:
+    params:
+      dataset : MSI224
+      model : unet, deeplab, pspnet
+      model.encoder_name: resnet18 , resnet34, resnet50, vgg16, tu-maxvit_tiny_tf_224.in1k, timm-mobilenetv3_large_100
+      task.logs_dir: WaterDetectionExp
+      seed : 42

@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task : segm1, segm2, segm3, segmentation
+      task.logs_dir: TimeSeriesSegmentation
+      model : unet
+      model.encoder_name: resnet50 #, resnet34, resnet50, vgg16, tu-maxvit_tiny_tf_224.in1k, timm-mobilenetv3_large_100
+      dataset : MSI224
+      seed : 42

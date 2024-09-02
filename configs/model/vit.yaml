@@ -1,4 +1,4 @@
-model_name : "timm/vit_small_patch16_224.augreg_in21k_ft_in1k"
+model_name : "timm/levit_256.fb_dist_in1k"
 pretrained : True
 num_classes : 3
 in_chans : 4

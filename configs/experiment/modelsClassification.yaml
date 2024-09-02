@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: classification
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: modelsClassification
+      model : convnext, vgg
+      dataset : MSI224
+      seed : 42

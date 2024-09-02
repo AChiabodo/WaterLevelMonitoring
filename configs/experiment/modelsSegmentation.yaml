@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: segmentation
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: modelsSegmentation
+      model : unet, deeplab, pspnet
+      dataset : MSI224
+      seed : 42

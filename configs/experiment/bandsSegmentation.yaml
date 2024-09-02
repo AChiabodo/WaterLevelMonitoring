@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - override /task: segmentation
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: bandsSegmentation
+      model : unet
+      model.encoder_name: resnet18 #, resnet34, resnet50, vgg16, tu-maxvit_tiny_tf_224.in1k, timm-mobilenetv3_large_100
+      dataset : NDWI224, RGB224, 6Bands224, MSI224
+      seed : 42

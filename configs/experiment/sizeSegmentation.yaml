@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: segmentation
+
+hydra :
+  sweeper:
+    params:
+      model : unet
+      model.encoder_name: resnet18 #, resnet34, resnet50, vgg16, tu-maxvit_tiny_tf_224.in1k, timm-mobilenetv3_large_100
+      task.logs_dir: sizeSegmentation
+      dataset : MSI128, MSI224, MSI384, MSI512
+      seed : 42

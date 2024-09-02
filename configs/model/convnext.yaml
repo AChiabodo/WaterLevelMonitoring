@@ -1,8 +1,8 @@
-model_name : "convnext_nano"
+model_name : "convnextv2_tiny"
 pretrained : False
 num_classes : 3
 in_chans : 4
-lr : 0.005
+lr : 0.01
 weight_decay : 0.01
 alpha : 0.5
 gamma : 1.0

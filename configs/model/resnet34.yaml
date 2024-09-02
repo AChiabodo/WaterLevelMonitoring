@@ -1,8 +1,7 @@
 model_name : "resnet34"
 pretrained : True
-num_classes : 3
 in_chans : 4
-lr : 0.0002
+lr : 0.0004
 weight_decay : 0.05
 alpha : 0.5
 gamma : 1.0

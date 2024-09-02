@@ -1,5 +1,5 @@
-model_name : "resnet18"
-pretrained : True
+model_name : "vgg13"
+pretrained : False
 lr : 0.001
 weight_decay : 0.01
 alpha : 0.5

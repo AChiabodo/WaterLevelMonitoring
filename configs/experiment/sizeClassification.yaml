@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: classification
+  - override /model: resnet18
+  - override /trainer: short
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: find_threshold
+      dataset : MSI128, MSI224, MSI512
+      seed : 42
