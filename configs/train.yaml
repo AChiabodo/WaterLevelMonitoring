@@ -1,7 +1,7 @@
 defaults:
   - _self_
-  - model: resnet18
-  - dataset: NDWI224
+  - model: unet
+  - dataset: MSI224
   - trainer: default
   - task: detection
 seed: 42
