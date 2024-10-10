@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task : class1,class2,class3,regression
+      task.name : regression
+      task.logs_dir: TimeSeriesRegression
+      task.num_classes : 1
+      model : resnet18
+      dataset : MSI224
+      seed : 42

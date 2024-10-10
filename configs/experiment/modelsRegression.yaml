@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: regression
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: modelsRegression
+      model : convnext, vgg , mobilenet, resnet18, resnet34, resnet50
+      dataset : MSI224
+      seed : 42

@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - override /task: regression
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: bandsRegression
+      model : resnet18
+      dataset : NDWI224, RGB224, 6Bands224, MSI224
+      seed : 42

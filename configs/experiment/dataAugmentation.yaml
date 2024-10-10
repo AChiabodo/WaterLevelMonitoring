@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - override /task: classification
+  - override /trainer: default
+
+hydra :
+  sweeper:
+    params:
+      task.logs_dir: dataAugmentation
+      task.transform: None
+      model : resnet50
+      dataset : MSI224
+      seed : 42
