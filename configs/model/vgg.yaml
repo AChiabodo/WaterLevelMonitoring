@@ -1,6 +1,6 @@
-model_name : "vgg13"
-pretrained : False
-lr : 0.001
+model_name : "vgg19"
+pretrained : True
+lr : 0.0001
 weight_decay : 0.01
 alpha : 0.5
 gamma : 1.0

@@ -1,4 +1,4 @@
-encoder_name : "resnet50"
+encoder_name : "resnet18"
 model_name : "unet"
 pretrained : True
 in_chans : 4

@@ -2,4 +2,4 @@ name : "segmentation"
 focus : "water"
 steps : [0]
 num_classes : 2
-logs_dir : "water_detection"
+logs_dir : "temp"

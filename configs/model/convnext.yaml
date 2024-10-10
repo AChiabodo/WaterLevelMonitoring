@@ -1,8 +1,8 @@
-model_name : "convnextv2_tiny"
-pretrained : False
+model_name : "convnextv2_femto"
+pretrained : True
 num_classes : 3
 in_chans : 4
-lr : 0.01
+lr : 1e-05
 weight_decay : 0.01
 alpha : 0.5
 gamma : 1.0
